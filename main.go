@@ -1,11 +1,15 @@
 package main
 
 import (
+	"errors"
 	"fmt"
+	"github.com/traefik/paerser/parser"
+	"gopkg.in/yaml.v3"
 	"io"
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"strings"
 	"text/template"
 
 	"github.com/spf13/cobra"
@@ -23,7 +27,6 @@ var (
 )
 
 func init() {
-
 	rootCmd.Flags().StringArrayVarP(&values, "value", "v", make([]string, 0), "a value to be substituted, format should be name=value")
 	rootCmd.Flags().StringVarP(&valuesFile, "values-file", "f", "", "the path to a yaml formatted file where the values can be sourced from")
 
@@ -42,7 +45,7 @@ var rootCmd = &cobra.Command{
 
 func main() {
 	if err := rootCmd.Execute(); err != nil {
-		fmt.Fprintln(os.Stderr, err)
+		_, _ = fmt.Fprintf(os.Stderr, "err: %s", err.Error())
 		os.Exit(1)
 	}
 }
@@ -65,6 +68,12 @@ func run(cmd *cobra.Command, args []string) error {
 	// Iterate through input files
 	for _, v := range inputFiles {
 
+		// Read in the data
+		data, err := ioutil.ReadFile(v)
+		if err != nil {
+			return fmt.Errorf("error reading \"%s\": %s", v, err.Error())
+		}
+
 		// Figure out where we want to write our results to
 		var writer io.Writer
 		if dryRun {
@@ -72,40 +81,24 @@ func run(cmd *cobra.Command, args []string) error {
 		} else {
 			path := filepath.Join(outputDir, v)
 
-			// Todo: Move to validate func
-			// Ensure we're allowed to overwrite if the output file is the same as the input file
-			absOutPath, err := filepath.Abs(path)
-			if err != nil {
-				return fmt.Errorf("error opening file for \"%s\": %s", absOutPath, err.Error())
-			}
-
-			absInPath, err := filepath.Abs(v)
-			if err != nil {
-				return fmt.Errorf("error opening file for \"%s\": %s", absInPath, err.Error())
-			}
-
-			if !overwrite && absInPath == absOutPath {
-				return fmt.Errorf("execution would overwrite input files, use the --overwrite flag to allow for the input files to be overridden")
-			}
-
 			// All good, write to the file
-			file, err := os.OpenFile(path, os.O_WRONLY|os.O_CREATE, 0644)
+			file, err := os.OpenFile(path, os.O_WRONLY|os.O_CREATE, 0777)
 			if err != nil {
-				return fmt.Errorf("error opening file for \"%s\": %s", v, err.Error())
+				return fmt.Errorf("error opening file for \"%s\": %s", path, err.Error())
 			}
 
 			// Ensure it's empty first
-			file.Truncate(0)
-			writer = file
-		}
+			err = file.Truncate(0)
+			if err != nil {
+				return err
+			}
 
-		data, err := ioutil.ReadFile(v)
-		if err != nil {
-			return fmt.Errorf("error reading \"%s\": %s", v, err.Error())
+			writer = file
 		}
 
 		origStr := string(data)
 
+		// Todo: What should the name be?
 		tmpl, err := template.New("test").Parse(origStr)
 		if err != nil {
 			return fmt.Errorf("error creating template for \"%s\": %s", v, err.Error())
@@ -132,7 +125,27 @@ func validateFlags() error {
 		return fmt.Errorf("at least one input file must be specified via the --input (-i) flag")
 	}
 
-	// Todo: Ensure files are not overwriten unless the --overwrite flag is specifie
+	// Ensure we're allowed to overwrite if the output file is the same as the input file
+	absOutPath, err := filepath.Abs(outputDir)
+	if err != nil {
+		// todo: improve error message
+		return fmt.Errorf("error determining output directory \"%s\": %s", absOutPath, err.Error())
+	}
+
+	// Ensure files are not overwriten unless the --overwrite flag is specifie
+	for _, inputFile := range inputFiles {
+
+		absInFile, err := filepath.Abs(inputFile)
+		if err != nil {
+			// todo: improve error message
+			return fmt.Errorf("error determining input file \"%s\": %s", absInFile, err.Error())
+		}
+
+		absInPath := filepath.Dir(absInFile)
+		if !overwrite && absInPath == absOutPath {
+			return fmt.Errorf("execution would overwrite input files, use the --overwrite flag to allow for the input files to be overridden")
+		}
+	}
 
 	return nil
 }
@@ -140,8 +153,56 @@ func validateFlags() error {
 func readValues(v interface{}) error {
 
 	// First, read from the values file if it exists
+	if len(valuesFile) > 0 && fileExists(valuesFile) {
+		data, err := ioutil.ReadFile(valuesFile)
+		if err != nil {
+			return err
+		}
+
+		err = yaml.Unmarshal(data, v)
+		if err != nil {
+			return err
+		}
+	}
 
 	// Second, read from the flags, flags should overwrite any values defined in the file
+	// vals := getValues(values)
+	// Todo: Extremely scuffed, maybe write your own parser?
+	for _, value := range values {
+		m := make(map[string]string)
+		parts := strings.Split(value, "=")
+		name := parts[0]
+		val := parts[1]
+
+		m[name] = val
+
+		firstPart := strings.Split(name, ".")[0]
+
+		err := parser.Decode(m, v, firstPart)
+		if err != nil {
+			return err
+		}
+	}
 
 	return nil
+}
+
+func getValues(values []string) map[string]string {
+
+	m := make(map[string]string)
+
+	for _, value := range values {
+		parts := strings.Split(value, "=")
+		name := parts[0]
+		val := parts[1]
+
+		m[name] = val
+	}
+
+	return m
+}
+
+func fileExists(path string) bool {
+	_, err := os.Stat(path)
+	return !errors.Is(err, os.ErrNotExist)
 }
