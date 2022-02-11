@@ -45,7 +45,7 @@ var rootCmd = &cobra.Command{
 
 func main() {
 	if err := rootCmd.Execute(); err != nil {
-		_, _ = fmt.Fprintf(os.Stderr, "err: %s", err.Error())
+		_, _ = fmt.Fprintf(os.Stderr, "err: %s\n", err.Error())
 		os.Exit(1)
 	}
 }
@@ -66,47 +66,28 @@ func run(cmd *cobra.Command, args []string) error {
 	}
 
 	// Iterate through input files
-	for _, v := range inputFiles {
+	for _, inputFile := range inputFiles {
 
 		// Read in the data
-		data, err := ioutil.ReadFile(v)
+		data, err := ioutil.ReadFile(inputFile)
 		if err != nil {
-			return fmt.Errorf("error reading \"%s\": %s", v, err.Error())
-		}
-
-		// Figure out where we want to write our results to
-		var writer io.Writer
-		if dryRun {
-			writer = os.Stdout
-		} else {
-			path := filepath.Join(outputDir, v)
-
-			// All good, write to the file
-			file, err := os.OpenFile(path, os.O_WRONLY|os.O_CREATE, 0777)
-			if err != nil {
-				return fmt.Errorf("error opening file for \"%s\": %s", path, err.Error())
-			}
-
-			// Ensure it's empty first
-			err = file.Truncate(0)
-			if err != nil {
-				return err
-			}
-
-			writer = file
+			return fmt.Errorf("error reading \"%s\": %s", inputFile, err.Error())
 		}
 
 		origStr := string(data)
 
+		// Figure out where we want to write our results to
+		writer, err := getResultWriter(inputFile)
+
 		// Todo: What should the name be?
 		tmpl, err := template.New("test").Parse(origStr)
 		if err != nil {
-			return fmt.Errorf("error creating template for \"%s\": %s", v, err.Error())
+			return fmt.Errorf("error creating template for \"%s\": %s", inputFile, err.Error())
 		}
 
 		err = tmpl.Execute(writer, values)
 		if err != nil {
-			return fmt.Errorf("error executing template for \"%s\": %s", v, err.Error())
+			return fmt.Errorf("error executing template for \"%s\": %s", inputFile, err.Error())
 		}
 	}
 
@@ -132,7 +113,7 @@ func validateFlags() error {
 		return fmt.Errorf("error determining output directory \"%s\": %s", absOutPath, err.Error())
 	}
 
-	// Ensure files are not overwriten unless the --overwrite flag is specifie
+	// Ensure files are not overwritten unless the --overwrite flag is specified
 	for _, inputFile := range inputFiles {
 
 		absInFile, err := filepath.Abs(inputFile)
@@ -166,40 +147,56 @@ func readValues(v interface{}) error {
 	}
 
 	// Second, read from the flags, flags should overwrite any values defined in the file
-	// vals := getValues(values)
-	// Todo: Extremely scuffed, maybe write your own parser?
-	for _, value := range values {
-		m := make(map[string]string)
-		parts := strings.Split(value, "=")
-		name := parts[0]
-		val := parts[1]
-
-		m[name] = val
-
-		firstPart := strings.Split(name, ".")[0]
-
-		err := parser.Decode(m, v, firstPart)
-		if err != nil {
-			return err
-		}
+	// Todo: Use a custom parser
+	rootNode := "root"
+	valueMap := getValues(values, rootNode)
+	err := parser.Decode(valueMap, v, rootNode)
+	if err != nil {
+		return err
 	}
 
 	return nil
 }
 
-func getValues(values []string) map[string]string {
+func getValues(values []string, rootNode string) map[string]string {
 
 	m := make(map[string]string)
 
 	for _, value := range values {
 		parts := strings.Split(value, "=")
-		name := parts[0]
+
+		key := fmt.Sprintf("%s.%s", rootNode, parts[0])
 		val := parts[1]
 
-		m[name] = val
+		m[key] = val
 	}
 
 	return m
+}
+
+func getResultWriter(inputFile string) (io.Writer, error) {
+
+	if dryRun {
+		// Todo: Custom formatting
+		return os.Stdout, nil
+	}
+
+	path := filepath.Join(outputDir, inputFile)
+
+	// All good, write to the file
+	// Todo: Revise perms
+	file, err := os.OpenFile(path, os.O_WRONLY|os.O_CREATE, 0777)
+	if err != nil {
+		return nil, fmt.Errorf("error opening file \"%s\": %s", path, err.Error())
+	}
+
+	// Ensure it's empty first
+	err = file.Truncate(0)
+	if err != nil {
+		return nil, err
+	}
+
+	return file, nil
 }
 
 func fileExists(path string) bool {
