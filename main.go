@@ -1,18 +1,16 @@
 package main
 
 import (
-	"errors"
 	"fmt"
+	"github.com/spf13/cobra"
 	"github.com/traefik/paerser/parser"
-	"gopkg.in/yaml.v3"
 	"io"
 	"io/ioutil"
 	"os"
+	"path"
 	"path/filepath"
 	"strings"
 	"text/template"
-
-	"github.com/spf13/cobra"
 )
 
 var (
