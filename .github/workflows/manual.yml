@@ -1,11 +1,11 @@
-name: "🏃‍♂️ Example workflow"
+name: "🏃‍♂️ Example Workflow"
 
 on:
   workflow_dispatch:
   
 jobs:
   render_template:
-    name: "✏️ Render template example"
+    name: "✏️ Render Template example"
     runs-on: ubuntu-latest
     steps:
     - name: "⬇️ Checkout"
@@ -20,5 +20,5 @@ jobs:
           --value "message=Hello World!" \
           --output .
     
-    - name: Print Template
+    - name: "🖨 Print Template"
       run: cat ./example.txt
