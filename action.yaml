@@ -1,5 +1,8 @@
 name: 'Render Go Template'
 description: 'Render template files using Go templates'
+branding:
+  icon: 'at-sign'
+  color: 'purple'
 runs:
   using: 'docker'
   image: 'Dockerfile'
