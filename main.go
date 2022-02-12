@@ -48,7 +48,7 @@ func main() {
 	}
 }
 
-func run(cmd *cobra.Command, args []string) error {
+func run(_ *cobra.Command, _ []string) error {
 
 	// Validate flags
 	err := validateFlags()
@@ -69,7 +69,7 @@ func run(cmd *cobra.Command, args []string) error {
 		// Read in the data
 		data, err := ioutil.ReadFile(inputFile)
 		if err != nil {
-			return fmt.Errorf("error reading \"%s\": %s", inputFile, err.Error())
+			return fmt.Errorf("failed to read \"%s\": %s", inputFile, err.Error())
 		}
 
 		origStr := string(data)
@@ -83,12 +83,12 @@ func run(cmd *cobra.Command, args []string) error {
 		// Todo: What should the name be?
 		tmpl, err := template.New("test").Parse(origStr)
 		if err != nil {
-			return fmt.Errorf("error creating template for \"%s\": %s", inputFile, err.Error())
+			return fmt.Errorf("failed to create template for \"%s\": %s", inputFile, err.Error())
 		}
 
 		err = tmpl.Execute(writer, values)
 		if err != nil {
-			return fmt.Errorf("error executing template for \"%s\": %s", inputFile, err.Error())
+			return fmt.Errorf("failed to execute template for \"%s\": %s", inputFile, err.Error())
 		}
 	}
 
@@ -106,7 +106,7 @@ func validateFlags() error {
 	absOutPath, err := filepath.Abs(outputDir)
 	if err != nil {
 		// todo: improve error message
-		return fmt.Errorf("error determining output directory \"%s\": %s", absOutPath, err.Error())
+		return fmt.Errorf("failed to find output directory \"%s\": %s", absOutPath, err.Error())
 	}
 
 	// Ensure files are not overwritten unless the --overwrite flag is specified
@@ -115,12 +115,12 @@ func validateFlags() error {
 		absInFile, err := filepath.Abs(inputFile)
 		if err != nil {
 			// todo: improve error message
-			return fmt.Errorf("error determining input file \"%s\": %s", absInFile, err.Error())
+			return fmt.Errorf("failed to find input file \"%s\": %s", absInFile, err.Error())
 		}
 
 		absInPath := filepath.Dir(absInFile)
 		if !overwrite && absInPath == absOutPath {
-			return fmt.Errorf("execution would overwrite input files, use the --overwrite flag to allow for the input files to be overridden")
+			return fmt.Errorf("execution would overwrite input files, use the --overwrite flag to allow for the input files to be overwritten")
 		}
 	}
 
