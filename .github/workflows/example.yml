@@ -12,7 +12,7 @@ jobs:
       uses: actions/checkout@v2.4.0
     
     - name: "✏️ Render Template"
-      uses: yukitsune/template-cli@main
+      uses: yukitsune/template-cli@v0.1.0
       with:
         args: --input ./example/example.txt \
           --value "person.name=Jason" \
