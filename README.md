@@ -18,14 +18,18 @@
 ```yaml
 steps:
   - name: Render template files
-    uses: yukitsune/template-cli@main
+    uses: yukitsune/template-cli@v0.1.0
     with:
       args: --input ./templates/file1 --input ./templates/file2 \
-        --value "person.name=Jason"\
-        --value "person.age=${{ secrets.PERSON_AGE }}"\
-        --value "secret=${{ secrets.GITHUB_TOKEN }}"
+        --value "person.name=Jason" \
+        --value "person.age=${{ secrets.PERSON_AGE }}" \
+        --value "secret=${{ secrets.GITHUB_TOKEN }}" \
         --output .
 ```
+
+### Example workflow
+This repo also contains an [example workflow](https://github.com/YuKitsune/template-cli/runs/5165039206?check_suite_focus=true) ([source](https://github.com/YuKitsune/template-cli/blob/main/.github/workflows/example.yml)).
+Feel free to use this as a guide!
 
 ## CLI
 ```shell
@@ -35,6 +39,7 @@ template -i ./templates/file1 -i ./templates/file2 \
   -v "secret=${{ secrets.GITHUB_TOKEN }}" \
   -o .
 ```
+
 
 # Contributing
 
