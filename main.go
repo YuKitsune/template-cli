@@ -56,9 +56,9 @@ func run(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	// Load values
+	// Load in the values
 	var values map[string]interface{}
-	err = readValues(&values)
+	err = parseValues(&values)
 	if err != nil {
 		return err
 	}
@@ -124,7 +124,7 @@ func validateFlags() error {
 	return nil
 }
 
-func readValues(v interface{}) error {
+func parseValues(v interface{}) error {
 
 	// Todo: Use a custom parser
 	rootNode := "root"
@@ -144,6 +144,8 @@ func getValues(values []string, rootNode string) map[string]string {
 	for _, value := range values {
 		parts := strings.Split(value, "=")
 
+		// Need to prefix everything with the root node name
+		// This doesn't actually make it into the values interface, it's something traefik specific that we don't need
 		key := fmt.Sprintf("%s.%s", rootNode, parts[0])
 		val := parts[1]
 
