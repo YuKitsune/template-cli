@@ -1,9 +1,9 @@
 <h1 align="center">
-  🏗 Template 🚧 
+  🏗 Render Go Template 🚧 
 </h1>
 
 <h3 align="center">
-  Utilise <a href="https://pkg.go.dev/text/template">Go templates</a> in a lightweight CLI
+  Harness the power of <a href="https://pkg.go.dev/text/template">Go templates</a> in a lightweight CLI or GitHub Action
 
   [![GitHub Workflow Status](https://img.shields.io/github/workflow/status/yukitsune/template-cli/CI)](https://github.com/yukitsune/template-cli/actions?query=workflow:CI)
   [![Go Report Card](https://goreportcard.com/badge/github.com/yukitsune/template-cli)](https://goreportcard.com/report/github.com/yukitsune/template-cli)
@@ -17,7 +17,7 @@
 ## GitHub Action
 ```yaml
 steps:
-  - name: Populate template files
+  - name: Render template files
     uses: yukitsune/template-cli@main
     with:
       args: --input ./templates/file1 --input ./templates/file2 \
@@ -28,12 +28,12 @@ steps:
 ```
 
 ## CLI
-```
-template --i ./templates/file1 --i ./templates/file2 \
-  --v "person.name=Jason"\
-  --v "person.age=${{ secrets.PERSON_AGE }}"\
-  --v "secret=${{ secrets.GITHUB_TOKEN }}"
-  --o .
+```shell
+template -i ./templates/file1 -i ./templates/file2 \
+  -v "person.name=Jason" \
+  -v "person.age=${{ secrets.PERSON_AGE }}" \
+  -v "secret=${{ secrets.GITHUB_TOKEN }}" \
+  -o .
 ```
 
 # Contributing

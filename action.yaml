@@ -1,5 +1,5 @@
-name: 'Template'
-description: 'Populate template files using Go templates'
+name: 'Render Go Template'
+description: 'Render template files using Go templates'
 runs:
   using: 'docker'
   image: 'Dockerfile'

@@ -34,8 +34,8 @@ func init() {
 }
 
 var rootCmd = &cobra.Command{
-	Use:   "populate-template",
-	Short: "Populate Template is a tool used to populate a set of files with values using Go templates",
+	Use:   "render-template",
+	Short: "Render Template is a tool used to render a set of template files using Go templates",
 	RunE:  run,
 }
 
