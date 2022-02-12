@@ -76,6 +76,9 @@ func run(cmd *cobra.Command, args []string) error {
 
 		// Figure out where we want to write our results to
 		writer, err := getResultWriter(inputFile)
+		if err != nil {
+			return err
+		}
 
 		// Todo: What should the name be?
 		tmpl, err := template.New("test").Parse(origStr)
@@ -162,25 +165,14 @@ func getResultWriter(inputFile string) (io.Writer, error) {
 		return os.Stdout, nil
 	}
 
-	path := filepath.Join(outputDir, inputFile)
+	inputFileName := path.Base(inputFile)
+	outFileName := filepath.Join(outputDir, inputFileName)
 
 	// All good, write to the file
-	// Todo: Revise perms
-	file, err := os.OpenFile(path, os.O_WRONLY|os.O_CREATE, 0777)
+	file, err := os.OpenFile(outFileName, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0666)
 	if err != nil {
-		return nil, fmt.Errorf("error opening file \"%s\": %s", path, err.Error())
-	}
-
-	// Ensure it's empty first
-	err = file.Truncate(0)
-	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to open file \"%s\": %s", outFileName, err.Error())
 	}
 
 	return file, nil
-}
-
-func fileExists(path string) bool {
-	_, err := os.Stat(path)
-	return !errors.Is(err, os.ErrNotExist)
 }
