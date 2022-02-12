@@ -1,0 +1,23 @@
+name: Example workflow
+
+on:
+  workflow_dispatch:
+  
+jobs:
+  render_template:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2.4.0
+    
+    - name: Render Template
+      uses: yukitsune/template-cli@main
+      with:
+        args: --input ./example/example.txt
+          --value "person.name=Jason"\
+          --value "person.age=25"\
+          --value "message=Hello World!"
+          --output .
+    
+    - name: Print Template
+      run: cat ./example.txt
