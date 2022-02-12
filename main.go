@@ -28,11 +28,11 @@ var (
 func init() {
 	rootCmd.Flags().StringArrayVarP(&values, "value", "v", make([]string, 0), "a value to be passed into the template, format should be \"name=value\"")
 
-	rootCmd.Flags().StringArrayVarP(&inputFiles, "input", "i", make([]string, 0), "the path to a file where the templates live")
+	rootCmd.Flags().StringArrayVarP(&inputFiles, "input", "i", make([]string, 0), "the path to a template file")
 	rootCmd.Flags().StringVarP(&outputDir, "output", "o", ".", "the path to a directory where the files will be placed after the templates have been applied")
 
-	rootCmd.Flags().BoolVar(&overwrite, "overwrite", false, "whether or not the input files should be overwritten after applying the templates")
-	rootCmd.Flags().BoolVar(&dryRun, "dry-run", false, "whether or not the this is a dry run")
+	rootCmd.Flags().BoolVar(&overwrite, "overwrite", false, "allows the input files should be overwritten if necessary after applying the templates")
+	rootCmd.Flags().BoolVar(&dryRun, "dry-run", false, "simulates a template execution, printing the results to stdout")
 }
 
 var rootCmd = &cobra.Command{
