@@ -16,8 +16,7 @@ import (
 )
 
 var (
-	values     []string
-	valuesFile string
+	values []string
 
 	inputFiles []string
 	outputDir  string
@@ -27,8 +26,7 @@ var (
 )
 
 func init() {
-	rootCmd.Flags().StringArrayVarP(&values, "value", "v", make([]string, 0), "a value to be substituted, format should be name=value")
-	rootCmd.Flags().StringVarP(&valuesFile, "values-file", "f", "", "the path to a yaml formatted file where the values can be sourced from")
+	rootCmd.Flags().StringArrayVarP(&values, "value", "v", make([]string, 0), "a value to be passed into the template, format should be \"name=value\"")
 
 	rootCmd.Flags().StringArrayVarP(&inputFiles, "input", "i", make([]string, 0), "the path to a file where the templates live")
 	rootCmd.Flags().StringVarP(&outputDir, "output", "o", ".", "the path to a directory where the files will be placed after the templates have been applied")
@@ -97,13 +95,8 @@ func run(cmd *cobra.Command, args []string) error {
 func validateFlags() error {
 
 	// Validate values
-	if len(values) == 0 && len(valuesFile) == 0 {
-		return fmt.Errorf("values must be specified either via the --values-file or --value (-v) flags")
-	}
-
-	// Validate input files
-	if len(inputFiles) == 0 {
-		return fmt.Errorf("at least one input file must be specified via the --input (-i) flag")
+	if len(values) == 0 {
+		return fmt.Errorf("at least one value must be specified via the --value (-v) flag")
 	}
 
 	// Ensure we're allowed to overwrite if the output file is the same as the input file
@@ -133,20 +126,6 @@ func validateFlags() error {
 
 func readValues(v interface{}) error {
 
-	// First, read from the values file if it exists
-	if len(valuesFile) > 0 && fileExists(valuesFile) {
-		data, err := ioutil.ReadFile(valuesFile)
-		if err != nil {
-			return err
-		}
-
-		err = yaml.Unmarshal(data, v)
-		if err != nil {
-			return err
-		}
-	}
-
-	// Second, read from the flags, flags should overwrite any values defined in the file
 	// Todo: Use a custom parser
 	rootNode := "root"
 	valueMap := getValues(values, rootNode)
