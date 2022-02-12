@@ -1,4 +1,4 @@
-module github.com/yukitsune/populate-template
+module github.com/yukitsune/template-cli
 
 go 1.15
 
