@@ -1,0 +1,2 @@
+Hello! My name is {{ .person.name }}. I am {{ .person.age }} years old.
+I have a message for you: {{ .message }}
