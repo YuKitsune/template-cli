@@ -5,7 +5,7 @@
 <h3 align="center">
   Harness the power of <a href="https://pkg.go.dev/text/template">Go templates</a> in a lightweight CLI or GitHub Action
 
-  [![GitHub Workflow Status](https://img.shields.io/github/workflow/status/YuKitsune/template-cli/CI)](https://github.com/YuKitsune/template-cli/actions?query=workflow:CI)
+  [![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/YuKitsune/template-cli/ci.yml?branch=main)](https://github.com/YuKitsune/camogo/actions/workflows/ci.yml)
   [![Go Report Card](https://goreportcard.com/badge/github.com/YuKitsune/template-cli)](https://goreportcard.com/report/github.com/YuKitsune/template-cli)
   [![License](https://img.shields.io/github/license/YuKitsune/template-cli)](https://github.com/YuKitsune/template-cli/blob/main/LICENSE)
   [![Latest Release](https://img.shields.io/github/v/release/YuKitsune/template-cli?include_prereleases)](https://github.com/YuKitsune/template-cli/releases)
