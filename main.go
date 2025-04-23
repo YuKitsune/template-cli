@@ -2,8 +2,6 @@ package main
 
 import (
 	"fmt"
-	"github.com/spf13/cobra"
-	"github.com/traefik/paerser/parser"
 	"io"
 	"io/ioutil"
 	"os"
@@ -11,6 +9,9 @@ import (
 	"path/filepath"
 	"strings"
 	"text/template"
+
+	"github.com/spf13/cobra"
+	"github.com/traefik/paerser/parser"
 )
 
 var (
@@ -143,7 +144,11 @@ func getValues(values []string, rootNode string) map[string]string {
 	m := make(map[string]string)
 
 	for _, value := range values {
-		parts := strings.Split(value, "=")
+		idx := strings.Index(value, "=")
+		parts := []string{
+			value[:idx],
+			value[idx+1:],
+		}
 
 		// Need to prefix everything with the root node name
 		// This doesn't actually make it into the values interface, it's something traefik specific that we don't need
